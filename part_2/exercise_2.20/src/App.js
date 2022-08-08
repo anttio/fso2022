@@ -10,7 +10,7 @@ const App = () => {
   const [newName, setNewName] = useState('');
   const [newNumber, setNewNumber] = useState('');
   const [filter, setFilter] = useState('');
-  const [notificationMessage, setNotificationMessage] = useState('');
+  const [notificationMessage, setNotificationMessage] = useState({});
 
   // Fetch persons data
   useEffect(() => {
@@ -44,7 +44,10 @@ const App = () => {
       setPersons(persons.concat(returnedPerson));
       setNewName('');
       setNewNumber('');
-      handleNotificationMessage(`Added ${returnedPerson.name}`);
+      handleNotificationMessage({
+        message: `Added ${returnedPerson.name}`,
+        type: 'success',
+      });
     });
   };
 
@@ -57,12 +60,16 @@ const App = () => {
             person.id !== updatePerson.id ? person : returnedPerson
           )
         );
-        handleNotificationMessage(`Updated ${returnedPerson.name}`);
+        handleNotificationMessage({
+          message: `Updated ${returnedPerson.name}`,
+          type: 'success',
+        });
       })
       .catch(() => {
-        handleNotificationMessage(
-          `Information of ${updatePerson.name} has already been removed from server`
-        );
+        handleNotificationMessage({
+          message: `Information of ${updatePerson.name} has already been removed from server`,
+          type: 'error',
+        });
         setPersons(persons.filter((person) => person.id !== updatePerson.id));
       });
   };
@@ -71,7 +78,10 @@ const App = () => {
     if (window.confirm(`Delete ${removePerson.name}?`)) {
       personService.remove(removePerson).then(() => {
         setPersons(persons.filter((person) => person.id !== removePerson.id));
-        handleNotificationMessage(`Deleted ${removePerson.name}`);
+        handleNotificationMessage({
+          message: `Deleted ${removePerson.name}`,
+          type: 'success',
+        });
       });
     }
   };
@@ -88,11 +98,11 @@ const App = () => {
     setFilter(event.target.value);
   };
 
-  const handleNotificationMessage = (message) => {
+  const handleNotificationMessage = ({ message, type }) => {
     if (message === null) {
       return false;
     }
-    setNotificationMessage(message);
+    setNotificationMessage({ message, type });
     setTimeout(() => {
       setNotificationMessage('');
     }, 5000);
@@ -101,7 +111,10 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
-      <Notification message={notificationMessage} />
+      <Notification
+        message={notificationMessage.message}
+        type={notificationMessage.type}
+      />
       <Filter filter={filter} onChange={handleFilterChange} />
 
       <h3>Add a new</h3>
